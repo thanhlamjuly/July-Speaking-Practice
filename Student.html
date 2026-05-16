@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IELTS Speaking Practice</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F5F0; --surface: #FFFFFF; --border: #E8E4DC; --text: #1A1814;
+    --text-muted: #7A7568; --accent: #2D5A3D; --accent-light: #EAF2ED; --accent-mid: #4A8B5C;
+    --danger: #C0392B; --danger-light: #FDECEA;
+    --part1: #2D5A3D; --part2: #1A4A7A; --part3: #6B2D8B; --mic-red: #E53E3E;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  #setup-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+  .setup-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 48px 40px; width: 460px; }
+  .setup-card h1 { font-family: 'DM Serif Display', serif; font-size: 30px; margin-bottom: 6px; }
+  .setup-card .subtitle { color: var(--text-muted); font-size: 14px; margin-bottom: 32px; }
+  .form-group { margin-bottom: 18px; }
+  .form-group label { font-size: 12px; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .form-group input { width: 100%; padding: 12px 16px; border: 1px solid var(--border); border-radius: 10px; font-size: 15px; font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); outline: none; transition: border-color 0.2s; }
+  .form-group input:focus { border-color: var(--accent); }
+  .part-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .part-opt { border: 2px solid var(--border); border-radius: 12px; padding: 14px 10px; text-align: center; cursor: pointer; transition: all 0.2s; }
+  .part-opt:hover { border-color: #C8C4BC; }
+  .part-opt.selected { border-color: var(--accent); background: var(--accent-light); }
+  .part-opt.full-opt { grid-column: 1/-1; display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-color: var(--accent); background: var(--accent-light); }
+  .part-opt.full-opt.selected { background: var(--accent); }
+  .part-opt.full-opt.selected .full-title { color: white; }
+  .part-opt.full-opt.selected .fb { background: rgba(255,255,255,0.2); color: white; }
+  .part-num { font-size: 22px; font-weight: 600; margin-bottom: 3px; }
+  .part-desc { font-size: 12px; color: var(--text-muted); }
+  .full-title { font-size: 18px; font-weight: 600; color: var(--accent); }
+  .full-badges { display: flex; gap: 5px; margin-top: 4px; }
+  .fb { font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 600; }
+  .fb1 { background: #EAF2ED; color: var(--part1); }
+  .fb2 { background: #E8F0FA; color: var(--part2); }
+  .fb3 { background: #F3EAF8; color: var(--part3); }
+  .full-sub { font-size: 13px; color: var(--text-muted); }
+  .btn-start { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.2s; margin-top: 8px; }
+  .btn-start:hover { background: var(--accent-mid); }
+
+  #part-transition { display: none; min-height: 100vh; align-items: center; justify-content: center; background: var(--bg); }
+  .transition-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 48px 40px; width: 420px; text-align: center; }
+  .transition-card .t-icon { font-size: 52px; margin-bottom: 16px; }
+  .transition-card h2 { font-family: 'DM Serif Display', serif; font-size: 26px; margin-bottom: 10px; }
+  .transition-card p { color: var(--text-muted); font-size: 14px; margin-bottom: 28px; line-height: 1.7; }
+  .t-steps { display: flex; justify-content: center; gap: 8px; margin-bottom: 28px; }
+  .t-step { width: 32px; height: 4px; border-radius: 999px; background: var(--border); }
+  .t-step.done { background: var(--accent); }
+  .t-step.active { background: var(--accent-mid); }
+  .part-done-score { display: inline-block; background: var(--accent-light); color: var(--accent); border-radius: 10px; padding: 10px 20px; font-size: 15px; font-weight: 600; margin-bottom: 20px; }
+
+  #practice-screen { display: none; min-height: 100vh; }
+  .practice-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 28px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
+  .logo { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--accent); }
+  .header-info { display: flex; align-items: center; gap: 14px; font-size: 13px; color: var(--text-muted); }
+  .pi-wrap { display: flex; gap: 5px; align-items: center; }
+  .pi-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: all 0.3s; }
+  .pi-dot.active { background: var(--accent); transform: scale(1.3); }
+  .pi-dot.done { background: var(--accent-mid); }
+  .btn-exit { padding: 6px 14px; border: 1px solid var(--border); border-radius: 8px; background: none; cursor: pointer; font-size: 13px; color: var(--text-muted); font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+  .btn-exit:hover { border-color: var(--danger); color: var(--danger); }
+
+  .practice-body { display: grid; grid-template-columns: 280px 1fr; min-height: calc(100vh - 56px); }
+
+  .teacher-panel { background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding: 24px 16px; }
+  .avatar-wrap { position: relative; margin-bottom: 14px; }
+  .avatar-img { width: 130px; height: 130px; border-radius: 50%; object-fit: cover; border: 3px solid var(--border); display: block; }
+  .avatar-placeholder { width: 130px; height: 130px; border-radius: 50%; background: var(--accent-light); border: 3px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 48px; }
+  .speaking-ring { position: absolute; inset: -6px; border-radius: 50%; border: 3px solid transparent; transition: all 0.3s; }
+  .speaking-ring.active { border-color: var(--accent); animation: pulse-ring 1.2s ease-in-out infinite; }
+  @keyframes pulse-ring { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.04);opacity:0.7} }
+  .teacher-name { font-family: 'DM Serif Display', serif; font-size: 17px; margin-bottom: 2px; }
+  .teacher-role { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; }
+  .upload-avatar-btn { font-size: 11px; color: var(--text-muted); cursor: pointer; text-decoration: underline; background: none; border: none; font-family: 'DM Sans', sans-serif; margin-bottom: 12px; }
+  .upload-avatar-btn:hover { color: var(--accent); }
+  .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 500; margin-bottom: 16px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; }
+  .status-idle { background: var(--bg); color: var(--text-muted); } .status-idle .dot { background: var(--text-muted); }
+  .status-speaking { background: var(--accent-light); color: var(--accent); } .status-speaking .dot { background: var(--accent); animation: blink 1s infinite; }
+  .status-listening { background: #FEF3E2; color: #B7791F; } .status-listening .dot { background: #B7791F; animation: blink 0.6s infinite; }
+  .status-thinking { background: #EEF2FF; color: #4338CA; } .status-thinking .dot { background: #4338CA; animation: blink 1.4s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .fp-wrap { width: 100%; margin-bottom: 16px; display: none; }
+  .fp-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .fp-parts { display: flex; gap: 5px; }
+  .fp-part { flex: 1; padding: 7px 4px; border-radius: 8px; text-align: center; border: 1px solid var(--border); font-size: 11px; font-weight: 500; transition: all 0.3s; color: var(--text-muted); }
+  .fp-part.active { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+  .fp-part.done { border-color: var(--accent-mid); background: var(--accent-light); color: var(--accent-mid); }
+
+  .progress-wrap { width: 100%; margin-top: auto; }
+  .progress-label { font-size: 11px; color: var(--text-muted); margin-bottom: 5px; display: flex; justify-content: space-between; }
+  .progress-bar { height: 3px; background: var(--bg); border-radius: 999px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 999px; transition: width 0.5s ease; }
+
+  .chat-panel { display: flex; flex-direction: column; }
+  .question-area { padding: 20px 24px; border-bottom: 1px solid var(--border); background: var(--surface); min-height: 110px; }
+  .question-label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 7px; }
+  .question-text { font-size: 18px; font-family: 'DM Serif Display', serif; line-height: 1.4; min-height: 32px; }
+  .question-text.placeholder { color: var(--text-muted); font-size: 14px; font-family: 'DM Sans', sans-serif; }
+  .timer-wrap { display: none; margin-top: 10px; }
+  .timer-bar { height: 3px; background: var(--border); border-radius: 999px; }
+  .timer-fill { height: 100%; border-radius: 999px; transition: width 1s linear, background 0.5s; }
+  .timer-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+  .transcript-area { flex: 1; padding: 18px 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+  .msg { display: flex; gap: 9px; animation: fadeUp 0.3s ease; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  .msg-avatar { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; overflow: hidden; background: var(--accent-light); display: flex; align-items: center; justify-content: center; font-size: 12px; }
+  .msg-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .msg-body { flex: 1; }
+  .msg-name { font-size: 10px; font-weight: 600; color: var(--text-muted); margin-bottom: 3px; }
+  .msg-text { font-size: 14px; line-height: 1.6; }
+  .msg.student { flex-direction: row-reverse; }
+  .msg.student .msg-body { text-align: right; }
+  .msg.student .msg-name { text-align: right; }
+  .msg.student .msg-text { background: var(--accent-light); border-radius: 0 12px 12px 12px; padding: 8px 12px; color: var(--accent); display: inline-block; }
+  .part-divider { text-align: center; padding: 6px; font-size: 11px; font-weight: 600; color: var(--text-muted); border-top: 1px dashed var(--border); margin: 2px 0; letter-spacing: 0.05em; }
+  .waveform { display: flex; align-items: center; gap: 3px; height: 20px; margin-top: 4px; }
+  .wave-bar { width: 3px; background: var(--accent); border-radius: 999px; animation: wave 0.8s ease-in-out infinite; }
+  .wave-bar:nth-child(2){animation-delay:.1s}.wave-bar:nth-child(3){animation-delay:.2s}.wave-bar:nth-child(4){animation-delay:.3s}.wave-bar:nth-child(5){animation-delay:.15s}
+  @keyframes wave { 0%,100%{height:4px} 50%{height:18px} }
+
+  .controls-area { padding: 16px 24px; border-top: 1px solid var(--border); background: var(--surface); display: flex; align-items: center; gap: 12px; }
+  .mic-btn { width: 56px; height: 56px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
+  .mic-btn.idle { background: var(--accent); }
+  .mic-btn.idle:hover { background: var(--accent-mid); transform: scale(1.05); }
+  .mic-btn.recording { background: var(--mic-red); animation: pulse-mic 1.5s ease-in-out infinite; }
+  .mic-btn.disabled { background: var(--border); cursor: not-allowed; }
+  @keyframes pulse-mic { 0%,100%{box-shadow:0 0 0 0 rgba(229,62,62,0.4)} 50%{box-shadow:0 0 0 12px rgba(229,62,62,0)} }
+  .mic-btn svg { width: 24px; height: 24px; }
+  .controls-info { flex: 1; font-size: 13px; color: var(--text-muted); }
+  .controls-info strong { color: var(--text); }
+  .btn-action { padding: 9px 18px; border: none; border-radius: 10px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; display: none; }
+  .btn-action.show { display: block; }
+  .btn-next-q { background: var(--accent); color: white; }
+  .btn-next-q:hover { background: var(--accent-mid); }
+  .btn-finish { border: 2px solid var(--accent); color: var(--accent); background: none; }
+  .btn-finish:hover { background: var(--accent); color: white; }
+
+  #result-screen { display: none; min-height: 100vh; background: var(--bg); }
+  .result-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
+  .result-body { max-width: 820px; margin: 0 auto; padding: 40px 24px; }
+  .result-hero { text-align: center; margin-bottom: 32px; }
+  .result-hero h2 { font-family: 'DM Serif Display', serif; font-size: 28px; margin-bottom: 6px; }
+  .result-hero p { color: var(--text-muted); font-size: 14px; }
+  .band-big { font-size: 64px; font-weight: 700; color: var(--accent); line-height: 1; margin: 12px 0 4px; }
+  .band-label { font-size: 13px; color: var(--text-muted); }
+  .full-badge-row { display: flex; justify-content: center; gap: 8px; margin-top: 12px; }
+  .score-cards { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 20px; }
+  .score-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; text-align: center; }
+  .score-card-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; }
+  .score-card-val { font-size: 24px; font-weight: 600; }
+  .part-scores { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+  .part-score-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
+  .part-score-card h4 { font-size: 11px; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .psr { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 3px; color: var(--text-muted); }
+  .psr span:last-child { font-weight: 600; color: var(--text); }
+  .feedback-block { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 22px; margin-bottom: 12px; }
+  .feedback-block h3 { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .feedback-block p { font-size: 14px; line-height: 1.7; }
+  .transcript-block { background: var(--bg); border-radius: 8px; padding: 12px; font-size: 12px; line-height: 1.8; white-space: pre-wrap; }
+  .result-actions { display: flex; gap: 12px; justify-content: center; margin-top: 24px; }
+  .btn-retry { padding: 12px 32px; background: var(--accent); color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .btn-retry:hover { background: var(--accent-mid); }
+  .toast { position: fixed; bottom: 24px; right: 24px; padding: 12px 20px; border-radius: 10px; font-size: 14px; color: white; background: var(--accent); z-index: 999; transform: translateY(80px); opacity: 0; transition: all 0.3s; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.error { background: var(--danger); }
+</style>
+</head>
+<body>
+
+<!-- SETUP -->
+<div id="setup-screen">
+  <div class="setup-card">
+    <h1>IELTS Speaking</h1>
+    <p class="subtitle">Luyện tập với AI Examiner — nhận điểm ngay sau buổi học</p>
+    <div class="form-group">
+      <label>Tên của bạn</label>
+      <input type="text" id="student-name" placeholder="Nhập tên...">
+    </div>
+    <div class="form-group">
+      <label>Chọn phần thi</label>
+      <div class="part-grid">
+        <div class="part-opt selected" onclick="selectPart(1,this)">
+          <div class="part-num" style="color:var(--part1)">1</div>
+          <div class="part-desc">Câu hỏi ngắn</div>
+        </div>
+        <div class="part-opt" onclick="selectPart(2,this)">
+          <div class="part-num" style="color:var(--part2)">2</div>
+          <div class="part-desc">Cue card</div>
+        </div>
+        <div class="part-opt" onclick="selectPart(3,this)">
+          <div class="part-num" style="color:var(--part3)">3</div>
+          <div class="part-desc">Thảo luận</div>
+        </div>
+        <div class="part-opt full-opt" onclick="selectPart('full',this)">
+          <div>
+            <div class="full-title">Full Test</div>
+            <div class="full-badges" style="margin-top:5px">
+              <span class="fb fb1">Part 1</span>
+              <span class="fb fb2">Part 2</span>
+              <span class="fb fb3">Part 3</span>
+            </div>
+          </div>
+          <div class="full-sub">~15 phút · Thi thật</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-start" onclick="startSession()">Bắt đầu luyện tập →</button>
+  </div>
+</div>
+
+<!-- PART TRANSITION -->
+<div id="part-transition">
+  <div class="transition-card">
+    <div class="t-icon" id="tr-icon">🗒️</div>
+    <h2 id="tr-title">Part 2 — Cue Card</h2>
+    <div class="part-done-score" id="tr-score">Part 1 · Band 6.5</div>
+    <p id="tr-desc">Bạn sẽ nhận một cue card và có 1 phút chuẩn bị trước khi nói trong 2 phút.</p>
+    <div class="t-steps">
+      <div class="t-step" id="ts1"></div>
+      <div class="t-step" id="ts2"></div>
+      <div class="t-step" id="ts3"></div>
+    </div>
+    <button class="btn-start" style="width:auto;padding:12px 32px" onclick="continueFullTest()">Tiếp tục →</button>
+  </div>
+</div>
+
+<!-- PRACTICE -->
+<div id="practice-screen">
+  <div class="practice-header">
+    <div class="logo">IELTS Speaking</div>
+    <div class="header-info">
+      <span id="header-student">—</span>
+      <div class="pi-wrap" id="pi-wrap" style="display:none">
+        <div class="pi-dot" id="pi1"></div>
+        <div class="pi-dot" id="pi2"></div>
+        <div class="pi-dot" id="pi3"></div>
+      </div>
+      <span id="header-part" style="font-weight:500;color:var(--text)">—</span>
+      <span id="header-qcount">0/0</span>
+    </div>
+    <button class="btn-exit" onclick="if(confirm('Thoát buổi luyện?'))location.reload()">Thoát</button>
+  </div>
+  <div class="practice-body">
+    <div class="teacher-panel">
+      <div class="avatar-wrap">
+        <div class="speaking-ring" id="speaking-ring"></div>
+        <div class="avatar-placeholder" id="av-placeholder">👩‍🏫</div>
+        <img class="avatar-img" id="avatar-img" style="display:none" src="" alt="Teacher">
+      </div>
+      <div class="teacher-name">Ms. July</div>
+      <div class="teacher-role">IELTS Examiner</div>
+      <label class="upload-avatar-btn" for="avatar-upload">📷 Đổi ảnh giáo viên</label>
+      <input type="file" id="avatar-upload" accept="image/*" style="display:none" onchange="changeAvatar(this)">
+      <div class="status-badge status-idle" id="status-badge">
+        <div class="dot"></div><span id="status-text">Sẵn sàng</span>
+      </div>
+      <div class="fp-wrap" id="fp-wrap">
+        <div class="fp-label">Full Test Progress</div>
+        <div class="fp-parts">
+          <div class="fp-part" id="fp1">Part 1</div>
+          <div class="fp-part" id="fp2">Part 2</div>
+          <div class="fp-part" id="fp3">Part 3</div>
+        </div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label"><span>Câu hỏi</span><span id="progress-text">0/0</span></div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="chat-panel">
+      <div class="question-area">
+        <div class="question-label" id="q-label">Câu hỏi hiện tại</div>
+        <div class="question-text placeholder" id="current-question">Đang tải câu hỏi...</div>
+        <div class="timer-wrap" id="timer-wrap">
+          <div class="timer-bar"><div class="timer-fill" id="timer-fill" style="width:100%;background:var(--accent)"></div></div>
+          <div class="timer-label" id="timer-label">60s</div>
+        </div>
+      </div>
+      <div class="transcript-area" id="transcript-area">
+        <div style="text-align:center;padding:40px;color:var(--text-muted);font-size:14px" id="empty-msg">Hội thoại sẽ hiển thị ở đây...</div>
+      </div>
+      <div class="controls-area">
+        <button class="mic-btn idle disabled" id="mic-btn" onclick="toggleRecord()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
+            <path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/>
+          </svg>
+        </button>
+        <div class="controls-info" id="controls-hint">Đợi AI hỏi xong rồi ấn mic để trả lời</div>
+        <button class="btn-action btn-next-q" id="btn-next" onclick="nextQuestion()">Câu tiếp →</button>
+        <button class="btn-action btn-finish" id="btn-finish" onclick="finishSession()">Xem kết quả</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div id="result-screen">
+  <div class="result-header">
+    <div style="font-family:'DM Serif Display',serif;font-size:18px;color:var(--accent)">IELTS Speaking</div>
+    <button class="btn-retry" onclick="location.reload()" style="padding:8px 20px;font-size:13px">Luyện lại</button>
+  </div>
+  <div class="result-body">
+    <div class="result-hero">
+      <h2>Kết quả buổi luyện tập</h2>
+      <p id="result-meta">—</p>
+      <div class="band-big" id="result-band">—</div>
+      <div class="band-label">Overall Band Score</div>
+      <div class="full-badge-row" id="full-badge-row" style="display:none">
+        <span class="fb fb1">Part 1 ✓</span><span class="fb fb2">Part 2 ✓</span><span class="fb fb3">Part 3 ✓</span>
+      </div>
+    </div>
+    <div class="score-cards">
+      <div class="score-card"><div class="score-card-label">Fluency</div><div class="score-card-val" id="r-fluency">—</div></div>
+      <div class="score-card"><div class="score-card-label">Lexical</div><div class="score-card-val" id="r-lexical">—</div></div>
+      <div class="score-card"><div class="score-card-label">Grammar</div><div class="score-card-val" id="r-grammar">—</div></div>
+      <div class="score-card"><div class="score-card-label">Pronunciation</div><div class="score-card-val" id="r-pronunciation">—</div></div>
+    </div>
+    <div id="part-breakdown" style="display:none">
+      <div class="part-scores">
+        <div class="part-score-card"><h4 style="color:var(--part1)">Part 1</h4>
+          <div class="psr"><span>Band</span><span id="r-p1-b">—</span></div>
+          <div class="psr"><span>Fluency</span><span id="r-p1-f">—</span></div>
+          <div class="psr"><span>Lexical</span><span id="r-p1-l">—</span></div>
+          <div class="psr"><span>Grammar</span><span id="r-p1-g">—</span></div>
+        </div>
+        <div class="part-score-card"><h4 style="color:var(--part2)">Part 2</h4>
+          <div class="psr"><span>Band</span><span id="r-p2-b">—</span></div>
+          <div class="psr"><span>Fluency</span><span id="r-p2-f">—</span></div>
+          <div class="psr"><span>Lexical</span><span id="r-p2-l">—</span></div>
+          <div class="psr"><span>Grammar</span><span id="r-p2-g">—</span></div>
+        </div>
+        <div class="part-score-card"><h4 style="color:var(--part3)">Part 3</h4>
+          <div class="psr"><span>Band</span><span id="r-p3-b">—</span></div>
+          <div class="psr"><span>Fluency</span><span id="r-p3-f">—</span></div>
+          <div class="psr"><span>Lexical</span><span id="r-p3-l">—</span></div>
+          <div class="psr"><span>Grammar</span><span id="r-p3-g">—</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="feedback-block"><h3>Nhận xét tổng thể</h3><p id="r-feedback">—</p></div>
+    <div class="feedback-block"><h3>Điểm mạnh</h3><p id="r-strengths">—</p></div>
+    <div class="feedback-block"><h3>Cần cải thiện</h3><p id="r-improve">—</p></div>
+    <div class="feedback-block"><h3>Transcript</h3><div class="transcript-block" id="r-transcript">—</div></div>
+    <div class="result-actions"><button class="btn-retry" onclick="location.reload()">Luyện lại</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCLRJvdvTed3SLW-1yD19A2SDs7o-u_rdM",
+  authDomain: "july-speaking.firebaseapp.com",
+  projectId: "july-speaking",
+  storageBucket: "july-speaking.firebasestorage.app",
+  messagingSenderId: "410591784650",
+  appId: "1:410591784650:web:3dc549fd23db2d634bce33"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const GROQ_KEY = "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";
+const GEMINI_KEY = "AIzaSyDxz-mq1M3dNCyKJDZlU5iBdcRzP5u4Yig";
+
+let selectedPart = 1, isFullTest = false, studentName = '';
+let questions = [], currentQIndex = 0, currentPart = 1;
+let partScores = {};
+let isRecording = false, mediaRecorder = null, audioChunks = [];
+let sessionTranscript = [], avatarDataUrl = null, timerInterval = null;
+
+// ─── SETUP ────────────────────────────────────────────────
+window.selectPart = (part, el) => {
+  selectedPart = part; isFullTest = part === 'full';
+  document.querySelectorAll('.part-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+};
+
+window.startSession = async () => {
+  studentName = document.getElementById('student-name').value.trim();
+  if (!studentName) { toast('Vui lòng nhập tên!', 'error'); return; }
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('practice-screen').style.display = 'block';
+  document.getElementById('header-student').textContent = studentName;
+  if (isFullTest) {
+    currentPart = 1;
+    document.getElementById('pi-wrap').style.display = 'flex';
+    document.getElementById('fp-wrap').style.display = 'block';
+    updateFTUI();
+  }
+  await loadPart(isFullTest ? 1 : selectedPart);
+  await ask();
+};
+
+// ─── FULL TEST UI ─────────────────────────────────────────
+function updateFTUI() {
+  [1,2,3].forEach(p => {
+    const fp = document.getElementById(`fp${p}`), pi = document.getElementById(`pi${p}`);
+    if (p < currentPart) { fp.className='fp-part done'; fp.textContent=`Part ${p} ✓`; pi.className='pi-dot done'; }
+    else if (p === currentPart) { fp.className='fp-part active'; fp.textContent=`Part ${p}`; pi.className='pi-dot active'; }
+    else { fp.className='fp-part'; fp.textContent=`Part ${p}`; pi.className='pi-dot'; }
+  });
+  document.getElementById('header-part').textContent = `Full Test · Part ${currentPart}`;
+}
+
+// ─── LOAD QUESTIONS ───────────────────────────────────────
+async function loadPart(part) {
+  try {
+    const snap = await getDocs(collection(db, 'questions'));
+    const all = snap.docs.map(d => d.data()).filter(q => q.part == part);
+    const count = part == 2 ? 1 : (part == 1 ? 4 : 3);
+    questions = all.sort(() => Math.random()-0.5).slice(0, count);
+    currentQIndex = 0;
+    if (!isFullTest) document.getElementById('header-part').textContent = `Part ${part}`;
+    updateProgress();
+  } catch(e) { toast('Lỗi tải câu hỏi: '+e.message,'error'); }
+}
+
+// ─── ASK ──────────────────────────────────────────────────
+async function ask() {
+  if (currentQIndex >= questions.length) {
+    isFullTest ? await endPart() : showFinish();
+    return;
+  }
+  const q = questions[currentQIndex];
+  document.getElementById('current-question').textContent = q.question;
+  document.getElementById('current-question').classList.remove('placeholder');
+  document.getElementById('q-label').textContent = `Part ${currentPart} · Câu ${currentQIndex+1}/${questions.length}`;
+
+  if (currentPart === 2) {
+    addMsg('ai', q.question);
+    await speak(q.question);
+    showTimer(60, 'Chuẩn bị', async () => {
+      const txt = "Time's up! Please begin speaking now.";
+      addMsg('ai', txt); await speak(txt);
+      showTimer(120, 'Trình bày', () => { if (isRecording) stopRec(); });
+      enableMic();
+    });
+    setStatus('idle','Sẵn sàng');
+  } else {
+    setStatus('speaking','Đang hỏi...');
+    addMsg('ai', q.question);
+    await speak(q.question);
+    setStatus('idle','Sẵn sàng');
+    enableMic();
+  }
+  updateProgress();
+}
+
+async function endPart() {
+  const tr = sessionTranscript.filter(t=>t.part===currentPart).map(t=>`${t.role}: ${t.text}`).join('\n');
+  const grade = await grade(tr, currentPart, true);
+  partScores[currentPart] = grade;
+  if (currentPart < 3) showTransition(currentPart+1, grade);
+  else showFinish();
+}
+
+// ─── TRANSITION ───────────────────────────────────────────
+function showTransition(next, prevGrade) {
+  document.getElementById('practice-screen').style.display = 'none';
+  document.getElementById('part-transition').style.display = 'flex';
+  const icons = {2:'🗒️',3:'💬'};
+  const titles = {2:'Part 2 — Cue Card',3:'Part 3 — Thảo luận'};
+  const descs = {
+    2:'Bạn sẽ nhận một cue card và có <strong>1 phút chuẩn bị</strong> trước khi nói liên tục <strong>2 phút</strong>.',
+    3:'Phần cuối cùng! Thảo luận sâu hơn về chủ đề liên quan Part 2.'
+  };
+  document.getElementById('tr-icon').textContent = icons[next];
+  document.getElementById('tr-title').textContent = titles[next];
+  document.getElementById('tr-desc').innerHTML = descs[next];
+  document.getElementById('tr-score').textContent = `Part ${currentPart} hoàn thành · Band ${prevGrade.overallBand}`;
+  [1,2,3].forEach(i => {
+    const el = document.getElementById(`ts${i}`);
+    el.className = 't-step' + (i < next ? ' done' : i === next ? ' active' : '');
+  });
+  currentPart = next;
+}
+
+window.continueFullTest = async () => {
+  document.getElementById('part-transition').style.display = 'none';
+  document.getElementById('practice-screen').style.display = 'block';
+  updateFTUI();
+  const area = document.getElementById('transcript-area');
+  const div = document.createElement('div');
+  div.className = 'part-divider';
+  div.textContent = `── Part ${currentPart} ──`;
+  area.appendChild(div);
+  await loadPart(currentPart);
+  await ask();
+};
+
+// ─── TTS ──────────────────────────────────────────────────
+function speak(text) {
+  return new Promise(resolve => {
+    if (!window.speechSynthesis) { resolve(); return; }
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang='en-US'; u.rate=0.92; u.pitch=1.05;
+    const v = speechSynthesis.getVoices();
+    u.voice = v.find(x=>x.lang==='en-US'&&x.name.toLowerCase().includes('female'))||v.find(x=>x.lang==='en-US')||v.find(x=>x.lang.startsWith('en'));
+    u.onstart = () => { setStatus('speaking','Đang hỏi...'); document.getElementById('speaking-ring').classList.add('active'); };
+    u.onend = () => { document.getElementById('speaking-ring').classList.remove('active'); resolve(); };
+    u.onerror = () => resolve();
+    speechSynthesis.speak(u);
+  });
+}
+
+// ─── MIC ──────────────────────────────────────────────────
+function enableMic() {
+  const b = document.getElementById('mic-btn');
+  b.classList.remove('disabled'); b.classList.add('idle');
+  document.getElementById('controls-hint').innerHTML = '<strong>Ấn mic</strong> để trả lời';
+}
+function disableMic() {
+  const b = document.getElementById('mic-btn');
+  b.classList.add('disabled'); b.classList.remove('idle','recording');
+}
+
+window.toggleRecord = async () => {
+  const b = document.getElementById('mic-btn');
+  if (b.classList.contains('disabled')) return;
+  if (!isRecording) {
+    try {
+      const s = await navigator.mediaDevices.getUserMedia({audio:true});
+      mediaRecorder = new MediaRecorder(s); audioChunks = [];
+      mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+      mediaRecorder.onstop = processRec;
+      mediaRecorder.start(); isRecording = true;
+      b.classList.remove('idle'); b.classList.add('recording');
+      setStatus('listening','Đang nghe...');
+      document.getElementById('controls-hint').innerHTML = '<strong>Ấn mic lần nữa</strong> để dừng';
+      showWave();
+    } catch { toast('Không truy cập được microphone!','error'); }
+  } else stopRec();
+};
+
+function stopRec() {
+  if (!isRecording||!mediaRecorder) return;
+  mediaRecorder.stop(); mediaRecorder.stream.getTracks().forEach(t=>t.stop());
+  isRecording = false;
+  const b = document.getElementById('mic-btn');
+  b.classList.remove('recording'); b.classList.add('disabled');
+  setStatus('thinking','Đang xử lý...'); removeWave();
+  document.getElementById('controls-hint').textContent = 'Đang xử lý câu trả lời...';
+}
+
+function showWave() {
+  const area = document.getElementById('transcript-area');
+  document.getElementById('empty-msg')?.remove();
+  const w = document.createElement('div');
+  w.className='msg student'; w.id='wave-msg';
+  w.innerHTML=`<div class="msg-avatar">${studentName[0]}</div><div class="msg-body"><div class="msg-name">${studentName}</div><div class="waveform">${Array(5).fill('<div class="wave-bar"></div>').join('')}</div></div>`;
+  area.appendChild(w); area.scrollTop=area.scrollHeight;
+}
+function removeWave() { document.getElementById('wave-msg')?.remove(); }
+
+// ─── PROCESS ──────────────────────────────────────────────
+async function processRec() {
+  const blob = new Blob(audioChunks,{type:'audio/webm'});
+  const q = questions[currentQIndex]||{question:''};
+  try {
+    const fd = new FormData();
+    fd.append('file',blob,'audio.webm');
+    fd.append('model','whisper-large-v3');
+    fd.append('language','en');
+    const res = await fetch('https://api.groq.com/openai/v1/audio/transcriptions',{method:'POST',headers:{'Authorization':`Bearer ${GROQ_KEY}`},body:fd});
+    if (!res.ok) throw new Error('Transcribe failed');
+    const { text } = await res.json();
+    if (!text?.trim()) { toast('Không nghe rõ, thử lại!','error'); enableMic(); setStatus('idle','Sẵn sàng'); return; }
+
+    addMsg('student', text);
+    sessionTranscript.push({role:'Q',text:q.question,part:currentPart});
+    sessionTranscript.push({role:'A',text,part:currentPart});
+
+    const g = await grade(text, currentPart, false, q.question);
+    addMsg('ai', g.feedback);
+    await speak(g.feedback);
+    await save(q.question, text, g);
+
+    currentQIndex++; updateProgress(); setStatus('idle','Sẵn sàng');
+
+    if (currentQIndex < questions.length) {
+      const btn = document.getElementById('btn-next');
+      btn.textContent = 'Câu tiếp →'; btn.onclick = nextQuestion;
+      btn.classList.add('show');
+      document.getElementById('controls-hint').textContent = 'Ấn "Câu tiếp" để tiếp tục';
+    } else if (isFullTest && currentPart < 3) {
+      const btn = document.getElementById('btn-next');
+      btn.textContent = `Sang Part ${currentPart+1} →`; btn.onclick = () => { btn.classList.remove('show'); endPart(); };
+      btn.classList.add('show');
+      document.getElementById('controls-hint').textContent = `Part ${currentPart} xong! Sẵn sàng tiếp chưa?`;
+    } else {
+      showFinish();
+    }
+  } catch(e) { toast('Lỗi: '+e.message,'error'); enableMic(); setStatus('idle','Sẵn sàng'); }
+}
+
+// ─── GRADE ────────────────────────────────────────────────
+async function grade(text, part, isSummary, question='') {
+  const p = isSummary
+    ? `IELTS examiner. Assess this Part ${part} session. Transcript: ${text}\nJSON only: {"overallBand":6.5,"fluency":6,"lexical":7,"grammar":6,"pronunciation":6.5,"feedback":"Vietnamese 2-3 sentences","strengths":"Vietnamese","improve":"Vietnamese"}`
+    : `IELTS examiner. Evaluate this answer briefly. Q: "${question}" A: "${text}" Part:${part}\nJSON only: {"overallBand":6.5,"fluency":6,"lexical":7,"grammar":6,"pronunciation":6.5,"feedback":"Vietnamese encouraging 2-3 sentences","strengths":"Vietnamese","improve":"Vietnamese"}`;
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:p}]}]})});
+  const data = await res.json();
+  let t = data.candidates?.[0]?.content?.parts?.[0]?.text||'{}';
+  t = t.replace(/```json|```/g,'').trim();
+  try { return JSON.parse(t); } catch { return {overallBand:'—',fluency:'—',lexical:'—',grammar:'—',pronunciation:'—',feedback:'Cảm ơn bạn!',strengths:'—',improve:'—'}; }
+}
+
+async function gradeAll() {
+  const full = sessionTranscript.map(t=>`[P${t.part}] ${t.role}: ${t.text}`).join('\n');
+  const p = `IELTS examiner. Overall assessment for complete test (Part 1+2+3). Transcript: ${full}\nJSON only: {"overallBand":6.5,"fluency":6.5,"lexical":7,"grammar":6,"pronunciation":6.5,"feedback":"Vietnamese 3-4 sentences","strengths":"Vietnamese","improve":"Vietnamese"}`;
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:p}]}]})});
+  const data = await res.json();
+  let t = data.candidates?.[0]?.content?.parts?.[0]?.text||'{}';
+  t = t.replace(/```json|```/g,'').trim();
+  try { return JSON.parse(t); } catch { return {overallBand:'—',fluency:'—',lexical:'—',grammar:'—',pronunciation:'—',feedback:'—',strengths:'—',improve:'—'}; }
+}
+
+// ─── SAVE ─────────────────────────────────────────────────
+async function save(question, transcript, g) {
+  try { await addDoc(collection(db,'results'),{studentName,part:currentPart,isFullTest,question,transcript,overallBand:g.overallBand,fluency:g.fluency,lexical:g.lexical,grammar:g.grammar,pronunciation:g.pronunciation,feedback:g.feedback,createdAt:new Date().toISOString()}); }
+  catch(e) { console.error(e); }
+}
+
+// ─── NAV ──────────────────────────────────────────────────
+window.nextQuestion = async () => { document.getElementById('btn-next').classList.remove('show'); disableMic(); await ask(); };
+function showFinish() {
+  document.getElementById('btn-finish').classList.add('show');
+  document.getElementById('controls-hint').textContent = isFullTest ? '🎉 Hoàn thành Full Test!' : '✓ Buổi luyện hoàn thành!';
+  disableMic();
+}
+
+window.finishSession = async () => {
+  setStatus('thinking','Đang tổng hợp...');
+  document.getElementById('btn-finish').classList.remove('show');
+  document.getElementById('btn-next').classList.remove('show');
+  if (isFullTest && currentPart===3 && !partScores[3]) {
+    const tr = sessionTranscript.filter(t=>t.part===3).map(t=>`${t.role}: ${t.text}`).join('\n');
+    partScores[3] = await grade(tr,3,true);
+  }
+  const final = isFullTest ? await gradeAll() : await grade(sessionTranscript.map(t=>`${t.role}: ${t.text}`).join('\n'), selectedPart, true);
+  showResult(final);
+};
+
+function showResult(g) {
+  document.getElementById('practice-screen').style.display='none';
+  document.getElementById('result-screen').style.display='block';
+  document.getElementById('result-meta').textContent=`${studentName} · ${isFullTest?'Full Test (P1+2+3)':`Part ${selectedPart}`} · ${new Date().toLocaleDateString('vi-VN')}`;
+  document.getElementById('result-band').textContent=g.overallBand;
+  document.getElementById('r-fluency').textContent=g.fluency;
+  document.getElementById('r-lexical').textContent=g.lexical;
+  document.getElementById('r-grammar').textContent=g.grammar;
+  document.getElementById('r-pronunciation').textContent=g.pronunciation;
+  document.getElementById('r-feedback').textContent=g.feedback;
+  document.getElementById('r-strengths').textContent=g.strengths;
+  document.getElementById('r-improve').textContent=g.improve;
+  document.getElementById('r-transcript').textContent=sessionTranscript.map(t=>`[Part ${t.part}] ${t.role}: ${t.text}`).join('\n\n');
+  if (isFullTest) {
+    document.getElementById('full-badge-row').style.display='flex';
+    document.getElementById('part-breakdown').style.display='block';
+    [1,2,3].forEach(p => {
+      const s=partScores[p]||{};
+      document.getElementById(`r-p${p}-b`).textContent=s.overallBand||'—';
+      document.getElementById(`r-p${p}-f`).textContent=s.fluency||'—';
+      document.getElementById(`r-p${p}-l`).textContent=s.lexical||'—';
+      document.getElementById(`r-p${p}-g`).textContent=s.grammar||'—';
+    });
+  }
+}
+
+// ─── TIMER ────────────────────────────────────────────────
+function showTimer(secs, label, onEnd) {
+  const wrap=document.getElementById('timer-wrap'), fill=document.getElementById('timer-fill'), lbl=document.getElementById('timer-label');
+  wrap.style.display='block'; let rem=secs; fill.style.width='100%'; fill.style.background='var(--accent)';
+  lbl.textContent=`${label}: ${rem}s`; clearInterval(timerInterval);
+  timerInterval=setInterval(()=>{ rem--; fill.style.width=(rem/secs*100)+'%'; if(rem<=10)fill.style.background='var(--danger)'; lbl.textContent=`${label}: ${rem}s`; if(rem<=0){clearInterval(timerInterval);wrap.style.display='none';onEnd();} },1000);
+}
+
+// ─── AVATAR ───────────────────────────────────────────────
+window.changeAvatar = input => {
+  const file=input.files[0]; if(!file) return;
+  const r=new FileReader(); r.onload=e=>{ avatarDataUrl=e.target.result; document.getElementById('avatar-img').src=avatarDataUrl; document.getElementById('avatar-img').style.display='block'; document.getElementById('av-placeholder').style.display='none'; localStorage.setItem('teacher_avatar',avatarDataUrl); toast('Đã cập nhật ảnh!'); }; r.readAsDataURL(file);
+};
+const sa=localStorage.getItem('teacher_avatar');
+if(sa){avatarDataUrl=sa;document.getElementById('avatar-img').src=sa;document.getElementById('avatar-img').style.display='block';document.getElementById('av-placeholder').style.display='none';}
+
+// ─── HELPERS ──────────────────────────────────────────────
+function addMsg(role, text) {
+  const area=document.getElementById('transcript-area');
+  document.getElementById('empty-msg')?.remove();
+  const m=document.createElement('div'); m.className=`msg ${role}`;
+  if(role==='ai') m.innerHTML=`<div class="msg-avatar">${avatarDataUrl?`<img src="${avatarDataUrl}" alt="T">`:'👩‍🏫'}</div><div class="msg-body"><div class="msg-name">Ms. July</div><div class="msg-text">${text}</div></div>`;
+  else m.innerHTML=`<div class="msg-avatar">${studentName[0]}</div><div class="msg-body"><div class="msg-name">${studentName}</div><div class="msg-text">${text}</div></div>`;
+  area.appendChild(m); area.scrollTop=area.scrollHeight;
+}
+function setStatus(type,text){document.getElementById('status-badge').className=`status-badge status-${type}`;document.getElementById('status-text').textContent=text;}
+function updateProgress(){const t=questions.length,d=Math.min(currentQIndex,t);document.getElementById('progress-text').textContent=`${d}/${t}`;document.getElementById('progress-fill').style.width=t?(d/t*100)+'%':'0%';document.getElementById('header-qcount').textContent=`${d}/${t}`;}
+function toast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast'+(type?' '+type:'')+' show';setTimeout(()=>t.className='toast',3000);}
+speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices();
+</script>
+</body>
+</html>
